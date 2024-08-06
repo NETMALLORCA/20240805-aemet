@@ -23,15 +23,29 @@ class Button extends HTMLElement {
     const button = this.shadow.querySelector('.send-button')
 
     button.addEventListener('click', async () => {
-      const response = await fetch('https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-02-01T00:00:00UTC/fechafin/2024-08-01T23:59:59UTC/estacion/B228/?api_key=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZXRtYWxsb3JjYUBob3RtYWlsLmNvbSIsImp0aSI6IjAxYzU4OTM3LWMyM2MtNDgyYi1hNmE5LWFmZDAwNWYyZGIwZiIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNzIyODUzNDA3LCJ1c2VySWQiOiIwMWM1ODkzNy1jMjNjLTQ4MmItYTZhOS1hZmQwMDVmMmRiMGYiLCJyb2xlIjoiIn0.j6Whx403hmr8iCxQK0E6KJylh0EaY0iKjGvFJOstvC4')
-      const data = await response.json()
+      let response = await fetch('https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2024-02-01T00:00:00UTC/fechafin/2024-08-01T23:59:59UTC/estacion/B228/?api_key=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuZXRtYWxsb3JjYUBob3RtYWlsLmNvbSIsImp0aSI6IjAxYzU4OTM3LWMyM2MtNDgyYi1hNmE5LWFmZDAwNWYyZGIwZiIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNzIyODUzNDA3LCJ1c2VySWQiOiIwMWM1ODkzNy1jMjNjLTQ4MmItYTZhOS1hZmQwMDVmMmRiMGYiLCJyb2xlIjoiIn0.j6Whx403hmr8iCxQK0E6KJylh0EaY0iKjGvFJOstvC4')
+      let data = await response.json()
 
-      console.log(data.datos)
+      response = await fetch(data.datos)
+      data = await response.json()
 
-      const apiresponse = await fetch(data.datos)
-      const weatherApi = await response.json()
+      data = data.map(element => {
+        const newElement = {}
 
-      consol log (weatherApi)
+        Object.entries(element).forEach(([key, value]) => {
+          newElement[key] = value.replace(',', '.')
+        })
+
+        return newElement
+      })
+
+      response = await fetch(`${import.meta.env.VITE_API_URL}/api/front/weather`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
     })
   }
 }
